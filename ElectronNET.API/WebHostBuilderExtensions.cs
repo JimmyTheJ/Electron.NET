@@ -34,7 +34,7 @@ namespace ElectronNET.API
             if(HybridSupport.IsElectronActive)
             {
                 builder.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
-                    .UseUrls(BridgeSettings.Protocol + "://0.0.0.0:" + BridgeSettings.WebPort);
+                    .UseUrls(BridgeSettings.Protocol + "://localhost:" + BridgeSettings.WebPort);
             }
 
             return builder;

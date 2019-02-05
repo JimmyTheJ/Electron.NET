@@ -1,5 +1,20 @@
 # not release
 
+
+# 0.0.11
+
+ElectronNET.CLI:
+
+* Invoke 'npm install' without --prod flag to install needed devDependencies as well.
+* Enable SourceLink
+* NuGet Package License Information updated (deprecation of licenseUrl)
+
+ElectronNET.API:
+
+* Documentation added for WebContents.GetUrl()
+* Enable SourceLink
+* NuGet Package License Information updated (deprecation of licenseUrl)
+
 # 0.0.10
 
 ElectronNET.API:

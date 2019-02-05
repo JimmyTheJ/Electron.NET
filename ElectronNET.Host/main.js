@@ -3,11 +3,11 @@ const { BrowserWindow, dialog, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const process = require('child_process').spawn;
-const portfinder = require('detect-port');
-let io, browserWindows, ipc, apiProcess, loadURL;
+const portscanner = require('portscanner');
+let io, server, browserWindows, ipc, apiProcess, loadURL;
 let appApi, menu, dialogApi, notification, tray, webContents;
 let globalShortcut, shellApi, screen, clipboard;
-let splashScreen, mainWindowId;
+let splashScreen, mainWindowId, hostHook;
 
 const manifestJsonFilePath = path.join(__dirname, 'bin', 'electron.manifest.json');
 const manifestJsonFile = require(manifestJsonFilePath);
@@ -28,12 +28,14 @@ app.on('ready', () => {
     }
 
     if (isStaticPortEnabled() === false) {
-        portfinder(manifestJsonFile.port, (error, port) => {
-            startSocketApiBridge(port);
-        });
+        startSocketApiBridge(manifestJsonFile.port);
     }
     else {
-        startSocketApiBridge(manifestJsonFile.port);
+        // hostname needs to belocalhost, otherwise Windows Firewall will be triggered.
+        portscanner.findAPortNotInUse(manifestJsonFile.port, 65535, 'localhost', function (error, port) {
+            console.log('Electron Socket IO Port: ' + port);
+            startSocketApiBridge(port);
+        });
     }
 });
 
@@ -75,7 +77,18 @@ function startSplashScreen() {
 }
 
 function startSocketApiBridge(port) {
-    io = require('socket.io')(port);
+
+    // instead of 'require('socket.io')(port);' we need to use this workaround
+    // otherwise the Windows Firewall will be triggered
+    server = require('http').createServer();
+    io = require('socket.io')();
+    io.attach(server);
+
+    server.listen(port, 'localhost');
+    server.on('listening', function () {
+        console.log('Electron Socket started on port %s at %s', server.address().port, server.address().address);
+    });
+
     startAspCoreBackend(port);
 
     io.on('connection', (socket) => {
@@ -99,13 +112,24 @@ function startSocketApiBridge(port) {
         if (splashScreen && !splashScreen.isDestroyed()) {
             splashScreen.close();
         }
+
+        try {
+            const hostHookScriptFilePath = path.join(__dirname, 'bin', 'ElectronHostHook', 'index.js');
+            const { HookService } = require(hostHookScriptFilePath);
+            if (hostHook === undefined) {
+                hostHook = new HookService(socket, app);
+                hostHook.onHostReady();
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
     });
 }
 
 function startAspCoreBackend(electronPort) {
     if (isStaticPortEnabled() === true) {
-        loadURL = `http://localhost:${manifestJsonFile.port + 1}`;
-        const parameters = [`/electronPort=${manifestJsonFile.port}`, `/electronWebPort=${manifestJsonFile.port + 1}`, `/protocol=${manifestJsonFile.protocol}`];
+        loadURL = `http://localhost:${electronPort + 1}`;
+        const parameters = [`/electronPort=${electronPort}`, `/electronWebPort=${electronPort + 1}`, `/protocol=${manifestJsonFile.protocol}`];
         let binaryFile = manifestJsonFile.executable;
 
         const os = require('os');
@@ -122,7 +146,9 @@ function startAspCoreBackend(electronPort) {
         });
     }
     else {
-        portfinder(manifestJsonFile.port, (error, electronWebPort) => {
+        // hostname needs to be localhost, otherwise Windows Firewall will be triggered.
+        portscanner.findAPortNotInUse(electronPort, 65535, 'localhost', function (error, electronWebPort) {
+            console.log('ASP.NET Core Port: ' + electronWebPort);
             loadURL = `http://localhost:${electronWebPort}`;
             const parameters = [`/electronPort=${electronPort}`, `/electronWebPort=${electronWebPort}`, `/protocol=${manifestJsonFile.protocol}`];
             let binaryFile = manifestJsonFile.executable;
