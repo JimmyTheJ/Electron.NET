@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>electronize</AssemblyName>
     
     <PackageType>DotnetCliTool</PackageType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>..\artifacts</PackageOutputPath>
     <PackageId>ElectronNET.CLI</PackageId>
-    <Version>1.0.4.2</Version>
+    <Version>1.0.4.3</Version>
     <Authors>Gregor Biswanger, Robert Muehsig</Authors>
     <Product>Electron.NET</Product>
     <Company />

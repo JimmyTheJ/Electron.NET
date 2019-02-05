@@ -25,13 +25,16 @@ namespace ElectronNET.API
                 } else if(argument.ToUpper().Contains("ELECTRONWEBPORT"))
                 {
                     BridgeSettings.WebPort = argument.ToUpper().Replace("/ELECTRONWEBPORT=", "");
+                } else if(argument.ToUpper().Contains("PROTOCOL"))
+                {
+                    BridgeSettings.Protocol = argument.ToUpper().Replace("/PROTOCOL=", "");
                 }
             }
 
             if(HybridSupport.IsElectronActive)
             {
                 builder.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
-                    .UseUrls("http://0.0.0.0:" + BridgeSettings.WebPort);
+                    .UseUrls(BridgeSettings.Protocol + "://0.0.0.0:" + BridgeSettings.WebPort);
             }
 
             return builder;

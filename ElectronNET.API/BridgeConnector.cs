@@ -18,7 +18,7 @@ namespace ElectronNET.API
                     {
                         if (_socket == null && HybridSupport.IsElectronActive)
                         {
-                            _socket = IO.Socket("http://localhost:" + BridgeSettings.SocketPort);
+                            _socket = IO.Socket(BridgeSettings.Protocol + "://localhost:" + BridgeSettings.SocketPort);
                             _socket.On(Socket.EVENT_CONNECT, () =>
                             {
                                 Console.WriteLine("BridgeConnector connected!");
@@ -32,7 +32,7 @@ namespace ElectronNET.API
                     {
                         if (_socket == null && !HybridSupport.IsElectronActive)
                         {
-                            _socket = IO.Socket(new Uri("http://localhost"), new IO.Options { AutoConnect = false });
+                            _socket = IO.Socket(new Uri(BridgeSettings.Protocol + "://localhost"), new IO.Options { AutoConnect = false });
                         }
                     }
                 }

@@ -5,6 +5,8 @@
     /// </summary>
     public static class BridgeSettings
     {
+        private static string _Protocol;
+
         /// <summary>
         /// Gets the socket port.
         /// </summary>
@@ -20,5 +22,23 @@
         /// The web port.
         /// </value>
         public static string WebPort { get; internal set; }
+
+        /// <summary>
+        /// Protocol used
+        /// </summary>
+        /// <value>
+        /// HTTPS/HTTP
+        /// </value>
+        public static string Protocol 
+        {
+            get { return _Protocol; }
+            internal set {
+                var val = value.ToLower();
+                if (val != "https" || val != "http")
+                {
+                    _Protocol = "http";
+                }
+            } 
+        }
     }
 }

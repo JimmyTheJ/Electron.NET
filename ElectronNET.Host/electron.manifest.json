@@ -1,3 +1,6 @@
 ﻿{
-  "executable": "{{executable}}"
+  "executable": "{{executable}}",
+  "port": "{{port}}",
+  "protocol": "{{protocol}}",
+  "static": "{{static}}"
 }
